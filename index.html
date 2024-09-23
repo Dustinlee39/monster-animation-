@@ -3,59 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monster Animation</title>
+    <title>Whimsical Monster Animation</title>
     <style>
-        /* Monster styling */
-        .monster {
-            width: 300px;
-            height: 300px;
-            background-image: url('https://github.com/Dustinlee39/monster-animation-/raw/main/Screenshot_20240922_123808_Gallery.png');
-            background-size: cover;
-            background-position: center;
-            position: absolute;
-        }
-
-        /* Keyframes for bouncing movement */
-        @keyframes monster-bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Apply animation to the monster */
-        .monster {
-            animation: monster-bounce 1.5s infinite ease-in-out;
-        }
-
-        /* Fullscreen background and monster movement */
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #87CEEB; /* Sky blue background */
+        canvas {
+            background-color: lightblue;
         }
     </style>
 </head>
 <body>
-
-    <!-- Monster element -->
-    <div class="monster"></div>
+    <canvas id="monsterCanvas" width="800" height="600"></canvas>
 
     <script>
-        const monster = document.querySelector('.monster');
+        const canvas = document.getElementById('monsterCanvas');
+        const ctx = canvas.getContext('2d');
 
-        // Random movement every second
-        function randomMovement() {
-            const randomX = Math.random() * (window.innerWidth - 300); // Monster width subtracted
-            const randomY = Math.random() * (window.innerHeight - 300); // Monster height subtracted
-            monster.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        const monster = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 100,
+            armAngle: 0,
+            legBob: 0,
+            eyeMovement: 0,
+            blink: false,
+            blinkTimer: 0,
+            mouthTimer: 0,
+            smileWide: true
+        };
+
+        // Function to draw the monster's body
+        function drawBody() {
+            ctx.beginPath();
+            ctx.arc(monster.x, monster.y, monster.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'green';
+            ctx.fill();
+            ctx.closePath();
         }
 
-        // Move the monster to a random position every second
-        setInterval(randomMovement, 1000); // 1000 milliseconds = 1 second
+        // Function to draw the horns
+        function drawHorns() {
+            ctx.beginPath();
+            ctx.moveTo(monster.x - 80, monster.y - 120); // Left horn
+            ctx.lineTo(monster.x - 100, monster.y - 180);
+            ctx.lineTo(monster.x - 60, monster.y - 120);
+            ctx.fillStyle = 'green';
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.moveTo(monster.x + 80, monster.y - 120); // Right horn
+            ctx.lineTo(monster.x + 100, monster.y - 180);
+            ctx.lineTo(monster.x + 60, monster.y - 120);
+            ctx.fillStyle = 'green';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Function to draw the face
+        function drawFace() {
+            // Draw eyes
+            let eyeOffset = Math.sin(monster.eyeMovement) * 10;
+            ctx.beginPath();
+            ctx.arc(monster.x - 40 + eyeOffset, monster.y - 30, 20, 0, Math.PI * 2); // Left eye
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(monster.x + 40 + eyeOffset, monster.y - 30, 20, 0, Math.PI * 2); // Right eye
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.closePath();
+
+            // Pupils
+            ctx.beginPath();
+            ctx.arc(monster.x - 40 + eyeOffset, monster.y - 30, 10, 0, Math.PI * 2); // Left pupil
+            ctx.fillStyle = 'black';
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(monster.x + 40 + eyeOffset, monster.y - 30, 10, 0, Math.PI * 2); // Right pupil
+            ctx.fillStyle = 'black';
+            ctx.fill();
+            ctx.closePath();
+
+            // Blinking
+            if (monster.blink) {
+                ctx.fillStyle = 'green';
+                ctx.fillRect(monster.x - 60, monster.y - 50, 40, 40); // Left eyelid
+                ctx.fillRect(monster.x + 20, monster.y - 50, 40, 40); // Right eyelid
+            }
+
+            // Nose
+            ctx.beginPath();
+            ctx.moveTo(monster.x, monster.y - 10);
+            ctx.lineTo(monster.x - 10, monster.y + 20);
+            ctx.lineTo(monster.x + 10, monster.y + 20);
+            ctx.fillStyle = 'green';
+            ctx.fill();
+            ctx.closePath();
+
+            // Smile
+            ctx.beginPath();
+            if (monster.smileWide) {
+                ctx.arc(monster.x, monster.y + 40, 50, 0, Math.PI); // Wide smile
+            } else {
+                ctx.arc(monster.x, monster.y + 40, 30, 0, Math.PI); // Small smile
+            }
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // Function to draw arms
+        function drawArms() {
+            let armSwing = Math.sin(monster.armAngle) * 20;
+
+            // Left arm
+            ctx.beginPath();
+            ctx.moveTo(monster.x - 100, monster.y);
+            ctx.lineTo(monster.x - 150, monster.y + armSwing);
+            ctx.lineTo(monster.x - 130, monster.y + armSwing + 20); // Fingers
+            ctx.lineTo(monster.x - 150, monster.y + armSwing);
+            ctx.lineTo(monster.x - 170, monster.y + armSwing + 20);
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.closePath();
+
+            // Right arm
+            ctx.beginPath();
+            ctx.moveTo(monster.x + 100, monster.y);
+            ctx.lineTo(monster.x + 150, monster.y + armSwing);
+            ctx.lineTo(monster.x + 130, monster.y + armSwing + 20); // Fingers
+            ctx.lineTo(monster.x + 150, monster.y + armSwing);
+            ctx.lineTo(monster.x + 170, monster.y + armSwing + 20);
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // Function to draw legs
+        function drawLegs() {
+            let legBob = Math.sin(monster.legBob) * 10;
+
+            // Left leg
+            ctx.beginPath();
+            ctx.moveTo(monster.x - 50, monster.y + 100);
+            ctx.lineTo(monster.x - 50, monster.y + 150 + legBob);
+            ctx.lineTo(monster.x - 60, monster.y + 150 + legBob); // Toes
+            ctx.lineTo(monster.x - 40, monster.y + 150 + legBob);
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 20;
+            ctx.stroke();
+            ctx.closePath();
+
+            // Right leg
+            ctx.beginPath();
+            ctx.moveTo(monster.x + 50, monster.y + 100);
+            ctx.lineTo(monster.x + 50, monster.y + 150 + legBob);
+            ctx.lineTo(monster.x + 60, monster.y + 150 + legBob); // Toes
+            ctx.lineTo(monster.x + 40, monster.y + 150 + legBob);
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 20;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // Update the monster's state
+        function updateMonster() {
+            monster.armAngle += 0.05;
+            monster.legBob += 0.05;
+            monster.eyeMovement += 0.03;
+
+            // Random blinking
+            monster.blinkTimer++;
+            if (monster.blinkTimer > 200) {
+                monster.blink = !monster.blink;
+                monster.blinkTimer = 0;
+            }
+
+            // Change smile over time
+            monster.mouthTimer++;
+            if (monster.mouthTimer > 300) {
+                monster.smileWide = !monster.smileWide;
+                monster.mouthTimer = 0;
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBody();
+            drawHorns();
+            drawFace();
+            drawArms();
+            drawLegs();
+            updateMonster();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
     </script>
-    
 </body>
 </html>
